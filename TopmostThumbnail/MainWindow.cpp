@@ -3,6 +3,45 @@
 
 const std::wstring MainWindow::ClassName = L"TopmostThumbnail.MainWindow";
 
+float ComputeScaleFactor(RECT const& windowRect, RECT const& contentRect)
+{
+    auto windowWidth = static_cast<float>(windowRect.right - windowRect.left);
+    auto windowHeight = static_cast<float>(windowRect.bottom - windowRect.top);
+    auto contentWidth = static_cast<float>(contentRect.right - contentRect.left);
+    auto contentHeight = static_cast<float>(contentRect.bottom - contentRect.top);
+
+    auto windowRatio = windowWidth / windowHeight;
+    auto contentRatio = contentWidth / contentHeight;
+
+    auto scaleFactor = windowWidth / contentWidth;
+    if (windowRatio > contentRatio)
+    {
+        scaleFactor = windowHeight / contentHeight;
+    }
+
+    return scaleFactor;
+}
+
+RECT ComputeDestRect(RECT const& windowRect, RECT const& contentRect)
+{
+    auto scaleFactor = ComputeScaleFactor(windowRect, contentRect);
+
+    auto windowWidth = static_cast<float>(windowRect.right - windowRect.left);
+    auto windowHeight = static_cast<float>(windowRect.bottom - windowRect.top);
+    auto contentWidth = static_cast<float>(contentRect.right - contentRect.left) * scaleFactor;
+    auto contentHeight = static_cast<float>(contentRect.bottom - contentRect.top) * scaleFactor;
+
+    auto remainingWidth = windowWidth - contentWidth;
+    auto remainingHeight = windowHeight - contentHeight;
+
+    auto left = static_cast<LONG>(remainingWidth / 2.0f);
+    auto top = static_cast<LONG>(remainingHeight / 2.0f);
+    auto right = left + static_cast<LONG>(contentWidth);
+    auto bottom = top + static_cast<LONG>(contentHeight);
+
+    return RECT{ left, top, right, bottom };
+}
+
 void MainWindow::RegisterWindowClass()
 {
     auto instance = winrt::check_pointer(GetModuleHandleW(nullptr));
@@ -71,9 +110,11 @@ LRESULT MainWindow::MessageHandler(UINT const message, WPARAM const wparam, LPAR
         RECT clientRect = {};
         winrt::check_bool(GetClientRect(m_window, &clientRect));
 
+        auto destRect = ComputeDestRect(clientRect, windowToThumbnailRect);
+
         DWM_THUMBNAIL_PROPERTIES properties = {};
         properties.dwFlags = DWM_TNP_RECTDESTINATION;
-        properties.rcDestination = clientRect;
+        properties.rcDestination = destRect;
         winrt::check_hresult(DwmUpdateThumbnailProperties(m_thumbnail, &properties));
     }
         break;
