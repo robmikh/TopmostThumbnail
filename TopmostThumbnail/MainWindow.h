@@ -9,5 +9,6 @@ struct MainWindow : robmikh::common::desktop::DesktopWindow<MainWindow>
 	LRESULT MessageHandler(UINT const message, WPARAM const wparam, LPARAM const lparam);
 
 private:
+	HWND m_windowToThumbnail = nullptr;
 	HTHUMBNAIL m_thumbnail = nullptr;
 };

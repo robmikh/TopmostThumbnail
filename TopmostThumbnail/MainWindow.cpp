@@ -23,6 +23,8 @@ MainWindow::MainWindow(std::wstring const& titleString, HWND windowToThumbnail)
 {
     auto instance = winrt::check_pointer(GetModuleHandleW(nullptr));
 
+    m_windowToThumbnail = windowToThumbnail;
+
     RECT windowToThumbnailRect = {};
     winrt::check_hresult(DwmGetWindowAttribute(windowToThumbnail, DWMWA_EXTENDED_FRAME_BOUNDS, reinterpret_cast<void*>(&windowToThumbnailRect), sizeof(windowToThumbnailRect)));
 
@@ -50,7 +52,6 @@ MainWindow::MainWindow(std::wstring const& titleString, HWND windowToThumbnail)
     properties.fVisible = true;
     properties.opacity = 255;
     properties.rcDestination = clientRect;
-
     winrt::check_hresult(DwmUpdateThumbnailProperties(m_thumbnail, &properties));
 
     ShowWindow(m_window, SW_SHOWDEFAULT);
@@ -59,5 +60,25 @@ MainWindow::MainWindow(std::wstring const& titleString, HWND windowToThumbnail)
 
 LRESULT MainWindow::MessageHandler(UINT const message, WPARAM const wparam, LPARAM const lparam)
 {
-    return base_type::MessageHandler(message, wparam, lparam);
+    switch (message)
+    {
+    case WM_SIZE:
+    case WM_SIZING:
+    {
+        RECT windowToThumbnailRect = {};
+        winrt::check_hresult(DwmGetWindowAttribute(m_windowToThumbnail, DWMWA_EXTENDED_FRAME_BOUNDS, reinterpret_cast<void*>(&windowToThumbnailRect), sizeof(windowToThumbnailRect)));
+
+        RECT clientRect = {};
+        winrt::check_bool(GetClientRect(m_window, &clientRect));
+
+        DWM_THUMBNAIL_PROPERTIES properties = {};
+        properties.dwFlags = DWM_TNP_RECTDESTINATION;
+        properties.rcDestination = clientRect;
+        winrt::check_hresult(DwmUpdateThumbnailProperties(m_thumbnail, &properties));
+    }
+        break;
+    default:
+        return base_type::MessageHandler(message, wparam, lparam);
+    }
+    return 0;
 }
