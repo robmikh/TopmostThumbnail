@@ -52,7 +52,7 @@ void MainWindow::RegisterWindowClass()
     wcex.hInstance = instance;
     wcex.hIcon = LoadIconW(instance, IDI_APPLICATION);
     wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
     wcex.lpszClassName = ClassName.c_str();
     wcex.hIconSm = LoadIconW(instance, IDI_APPLICATION);
     winrt::check_bool(RegisterClassExW(&wcex));
