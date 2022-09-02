@@ -1,7 +1,11 @@
 ﻿#pragma once
 
+// Collision from minwindef min/max and std
+#define NOMINMAX
+
 // Windows
 #include <windows.h>
+#include <windowsx.h>
 
 // Must come before C++/WinRT
 #include <wil/cppwinrt.h>
@@ -39,6 +43,7 @@
 #include <algorithm>
 #include <iostream>
 #include <mutex>
+#include <sstream>
 
 // robmikh.common
 #include <robmikh.common/composition.interop.h>

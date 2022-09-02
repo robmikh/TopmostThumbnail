@@ -5,6 +5,7 @@ namespace winrt
 {
     using namespace Windows::Foundation;
     using namespace Windows::Foundation::Numerics;
+    using namespace Windows::UI::Composition;
 }
 
 namespace util
@@ -18,7 +19,7 @@ int wmain(int argc, wchar_t* argv[])
 {
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     // Initialize COM
-    winrt::init_apartment();
+    winrt::init_apartment(winrt::apartment_type::single_threaded);
 
     // Args
     std::vector<std::wstring> args(argv + 1, argv + argc);
@@ -42,8 +43,14 @@ int wmain(int argc, wchar_t* argv[])
     wprintf(L"Using window \"%s\"\n", foundWindow.Title.c_str());
     auto windowToThumbnail = foundWindow.WindowHandle;
 
+    // Create the DispatcherQueue that the compositor needs to run
+    auto controller = util::CreateDispatcherQueueControllerForCurrentThread();
+
+    // Create our Compositor
+    auto compositor = winrt::Compositor();
+
     // Create our thumbnail window
-    auto window = MainWindow(L"TopmostThumbnail", windowToThumbnail);
+    auto window = MainWindow(compositor, L"TopmostThumbnail", windowToThumbnail);
 
     // Message pump
     MSG msg;
