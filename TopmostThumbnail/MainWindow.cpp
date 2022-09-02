@@ -2,6 +2,7 @@
 #include "MainWindow.h"
 
 const std::wstring MainWindow::ClassName = L"TopmostThumbnail.MainWindow";
+std::once_flag MainWindowClassRegistration;
 
 float ComputeScaleFactor(RECT const& windowRect, RECT const& contentRect)
 {
@@ -61,6 +62,8 @@ void MainWindow::RegisterWindowClass()
 MainWindow::MainWindow(std::wstring const& titleString, HWND windowToThumbnail)
 {
     auto instance = winrt::check_pointer(GetModuleHandleW(nullptr));
+
+    std::call_once(MainWindowClassRegistration, []() { RegisterWindowClass(); });
 
     m_windowToThumbnail = windowToThumbnail;
 

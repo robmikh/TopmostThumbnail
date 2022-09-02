@@ -41,9 +41,6 @@ int wmain(int argc, wchar_t* argv[])
     auto foundWindow = GetWindowToCapture(windows);
     wprintf(L"Using window \"%s\"\n", foundWindow.Title.c_str());
     auto windowToThumbnail = foundWindow.WindowHandle;
-    
-    // Register our window classes
-    MainWindow::RegisterWindowClass();
 
     // Create our thumbnail window
     auto window = MainWindow(L"TopmostThumbnail", windowToThumbnail);
